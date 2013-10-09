@@ -59,6 +59,7 @@ SettingsImpl::SettingsImpl(QWidget* p, Git* g, int defTab) : QDialog(p), git(g) 
 	SCRef APOpt(set.value(AM_P_OPT_KEY).toString());
 	SCRef FPOpt(set.value(FMT_P_OPT_KEY).toString());
 	SCRef extDiff(set.value(EXT_DIFF_KEY, EXT_DIFF_DEF).toString());
+	SCRef extEditor(set.value(EXT_EDITOR_KEY, EXT_EDITOR_DEF).toString());
 	SCRef exFile(set.value(EX_KEY, EX_DEF).toString());
 	SCRef exPDir(set.value(EX_PER_DIR_KEY, EX_PER_DIR_DEF).toString());
 	SCRef tmplt(set.value(CMT_TEMPL_KEY, CMT_TEMPL_DEF).toString());
@@ -67,6 +68,7 @@ SettingsImpl::SettingsImpl(QWidget* p, Git* g, int defTab) : QDialog(p), git(g) 
 	lineEditApplyPatchExtraOptions->setText(APOpt);
 	lineEditFormatPatchExtraOptions->setText(FPOpt);
 	lineEditExternalDiffViewer->setText(extDiff);
+	lineEditExternalTextEditor->setText(extEditor);
 	lineEditExcludeFile->setText(exFile);
 	lineEditExcludePerDir->setText(exPDir);
 	lineEditTemplate->setText(tmplt);
@@ -230,6 +232,14 @@ void SettingsImpl::pushButtonExtDiff_clicked() {
 		lineEditExternalDiffViewer->setText(extDiffName);
 }
 
+void SettingsImpl::pushButtonExtEditor_clicked() {
+
+	QString extEditorName(QFileDialog::getOpenFileName(this,
+	                    "Select the text editor"));
+	if (!extEditorName.isEmpty())
+		lineEditExternalTextEditor->setText(extEditorName);
+}
+
 void SettingsImpl::pushButtonFont_clicked() {
 
 	bool ok;
@@ -316,6 +326,11 @@ void SettingsImpl::checkBoxCommitUseDefMsg_toggled(bool b) {
 void SettingsImpl::lineEditExternalDiffViewer_textChanged(const QString& s) {
 
 	writeSetting(EXT_DIFF_KEY, s);
+}
+
+void SettingsImpl::lineEditExternalTextEditor_textChanged(const QString& s) {
+
+	writeSetting(EXT_EDITOR_KEY, s);
 }
 
 void SettingsImpl::lineEditApplyPatchExtraOptions_textChanged(const QString& s) {

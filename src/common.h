@@ -201,6 +201,7 @@ namespace QGit {
 	extern const QString EX_KEY;
 	extern const QString EX_PER_DIR_KEY;
 	extern const QString EXT_DIFF_KEY;
+	extern const QString EXT_EDITOR_KEY;
 	extern const QString REC_REP_KEY;
 	extern const QString ACT_LIST_KEY;
 	extern const QString ACT_GEOM_KEY;
@@ -213,6 +214,7 @@ namespace QGit {
 	extern const QString EX_DEF;
 	extern const QString EX_PER_DIR_DEF;
 	extern const QString EXT_DIFF_DEF;
+	extern const QString EXT_EDITOR_DEF;
 
 	// settings booleans
 	enum FlagType {

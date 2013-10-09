@@ -35,6 +35,7 @@ protected slots:
 	void checkBoxCommitVerify_toggled(bool b);
 	void checkBoxCommitUseDefMsg_toggled(bool b);
 	void lineEditExternalDiffViewer_textChanged(const QString& s);
+        void lineEditExternalTextEditor_textChanged(const QString& s);
 	void lineEditApplyPatchExtraOptions_textChanged(const QString& s);
 	void lineEditFormatPatchExtraOptions_textChanged(const QString& s);
 	void lineEditExcludeFile_textChanged(const QString& s);
@@ -46,6 +47,7 @@ protected slots:
 	void comboBoxGitConfigSource_activated(int i);
 	void treeWidgetGitConfig_itemChanged(QTreeWidgetItem*, int);
 	void pushButtonExtDiff_clicked();
+	void pushButtonExtEditor_clicked();
 	void pushButtonFont_clicked();
 
 private:

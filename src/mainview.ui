@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainBase</class>
  <widget class="QMainWindow" name="MainBase">
@@ -101,7 +101,7 @@
      <x>0</x>
      <y>0</y>
      <width>905</width>
-     <height>21</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="Help">
@@ -169,6 +169,7 @@
     <addaction name="ActViewFile"/>
     <addaction name="ActViewFileNewTab"/>
     <addaction name="ActExternalDiff"/>
+    <addaction name="ActExternalEdit"/>
     <addaction name="ActShowTree"/>
     <addaction name="ActSplitView"/>
     <addaction name="ActToggleLogsDiff"/>
@@ -772,6 +773,21 @@
     <string>Make new branch on selected revision</string>
    </property>
   </action>
+  <action name="ActExternalEdit">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/resources/misc.png</normaloff>:/icons/resources/misc.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit File</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -870,6 +886,22 @@
    <signal>triggered()</signal>
    <receiver>MainBase</receiver>
    <slot>ActExternalDiff_activated()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ActExternalEdit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainBase</receiver>
+   <slot>ActExternalEdit_activated()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>

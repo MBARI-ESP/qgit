@@ -313,6 +313,44 @@ void MainImpl::getExternalDiffArgs(QStringList* args, QStringList* filenames) {
 	filenames->append(fName2);
 }
 
+// *************************** ExternalTextEditor ***************************
+
+void MainImpl::ActExternalEdit_activated() {
+
+	QStringList args;
+	QStringList filenames;
+        
+	// get external diff viewer command
+	QSettings settings;
+	QString extEdit(settings.value(EXT_EDITOR_KEY, EXT_EDITOR_DEF).toString());
+
+	QApplication::restoreOverrideCursor();
+
+	// if command doesn't have %1 to denote filenames, add them to end
+	if (!extEdit.contains("%1")) {
+		extEdit.append(" %1");
+	}
+
+	// set process arguments
+	QStringList extEditArgs = extEdit.split(' ');
+	QString curArg;
+	for (int i = 0; i < extEditArgs.count(); i++) {
+		curArg = extEditArgs.value(i);
+		curArg.replace("%1", rv->st.fileName());
+		args.append(curArg);
+	}
+
+	QProcess* externalEditor = new QProcess(this);
+	externalEditor->setWorkingDirectory(curDir);
+
+	if (!QGit::startProcess(externalEditor, args)) {
+		QString text("Cannot start external text editor: ");
+		text.append(args[0]);
+		QMessageBox::warning(this, "Error - QGit", text);
+                delete externalEditor;
+	}
+}
+
 // ********************** Repository open or changed *************************
 
 void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
@@ -431,6 +469,7 @@ void MainImpl::updateContextActions(SCRef newRevSha, SCRef newFileName,
 	ActViewFile->setEnabled(fileActionsEnabled);
 	ActViewFileNewTab->setEnabled(fileActionsEnabled && firstTab<FileView>());
 	ActExternalDiff->setEnabled(fileActionsEnabled);
+	ActExternalEdit->setEnabled(fileActionsEnabled);
 	ActSaveFile->setEnabled(fileActionsEnabled);
 	ActFilterTree->setEnabled(pathActionsEnabled || ActFilterTree->isChecked());
 
@@ -1163,8 +1202,12 @@ void MainImpl::doContexPopup(SCRef sha) {
 	if (isRevPage && ActViewDiffNewTab->isEnabled())
 		contextMenu.addAction(ActViewDiffNewTab);
 
-	if (!isFilePage && ActExternalDiff->isEnabled())
+	if (!isFilePage) {
+          if (ActExternalDiff->isEnabled())
 		contextMenu.addAction(ActExternalDiff);
+          if (ActExternalEdit->isEnabled())
+		contextMenu.addAction(ActExternalEdit);
+        }
 
 	if (isRevPage) {
 		if (ActCommit->isEnabled() && (sha == ZERO_SHA))
@@ -1271,8 +1314,10 @@ void MainImpl::doFileContexPopup(SCRef fileName, int type) {
 	if (!isDir) {
 		if (ActSaveFile->isEnabled())
 			contextMenu.addAction(ActSaveFile);
-		if ((type == POPUP_FILE_EV) && ActExternalDiff->isEnabled())
+		if (type == POPUP_FILE_EV && ActExternalDiff->isEnabled())
 			contextMenu.addAction(ActExternalDiff);
+                if (ActExternalEdit->isEnabled())
+		      contextMenu.addAction(ActExternalEdit);
 	}
 	contextMenu.exec(QCursor::pos());
 }
