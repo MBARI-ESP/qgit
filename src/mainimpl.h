@@ -180,32 +180,37 @@ private:
 	bool setRepositoryBusy;
 };
 
-class ExternalDiffProc : public QProcess {
+class ExternalProc : public QProcess {
 Q_OBJECT
 public:
-	ExternalDiffProc(const QStringList& f, QObject* p)
-		: QProcess(p), filenames(f) {
-
+	ExternalProc(QObject* p) : QProcess(p) {
 		connect(this, SIGNAL(finished(int, QProcess::ExitStatus)),
 		        this, SLOT(on_finished(int, QProcess::ExitStatus)));
 	}
-	~ExternalDiffProc() {
-
+	~ExternalProc() {
 		terminate();
+	}
+
+private slots:
+	void on_finished(int, QProcess::ExitStatus) { deleteLater(); }
+};
+
+class ExternalDiffProc : public ExternalProc {
+Q_OBJECT
+public:
+	ExternalDiffProc(const QStringList& f, QObject* p)
+		: ExternalProc(p), filenames(f)
+        {}
+	~ExternalDiffProc() {
 		removeFiles();
 	}
 	QStringList filenames;
 
-private slots:
-	void on_finished(int, QProcess::ExitStatus) { deleteLater(); }
-
 private:
 	void removeFiles() {
-
-		if (!filenames.empty()) {
-			QDir d; // remove temporary files to diff on
-			d.remove(filenames[0]);
-			d.remove(filenames[1]);
+		QDir d; // remove temporary files to diff on
+		foreach(const QString &fn, filenames) {
+			d.remove(fn);
 		}
 	}
 };

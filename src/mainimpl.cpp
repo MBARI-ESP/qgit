@@ -340,7 +340,7 @@ void MainImpl::ActExternalEdit_activated() {
 		args.append(curArg);
 	}
 
-	QProcess* externalEditor = new QProcess(this);
+	ExternalProc* externalEditor = new ExternalProc(this);
 	externalEditor->setWorkingDirectory(curDir);
 
 	if (!startProcess(externalEditor, args)) {
