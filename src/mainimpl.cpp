@@ -85,7 +85,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
 	QString font(settings.value(STD_FNT_KEY).toString());
 	if (font.isEmpty())
 		font = QApplication::font().toString();
-	QGit::STD_FONT.fromString(font);
+	STD_FONT.fromString(font);
 
 	// set-up typewriter (fixed width) font
 	font = settings.value(TYPWRT_FNT_KEY).toString();
@@ -96,7 +96,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
 		fnt.setFamily(fnt.defaultFamily()); // the family corresponding
 		font = fnt.toString();              // to current style hint
 	}
-	QGit::TYPE_WRITER_FONT.fromString(font);
+	TYPE_WRITER_FONT.fromString(font);
 
 	// set-up tab view
 	delete tabWdg->currentWidget(); // cannot be done in Qt Designer
@@ -120,7 +120,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
 	statusBar()->addPermanentWidget(pbFileNamesLoading);
 
 	QVector<QSplitter*> v(1, treeSplitter);
-	QGit::restoreGeometrySetting(QGit::MAIN_GEOM_KEY, this, &v);
+	restoreGeometrySetting(MAIN_GEOM_KEY, this, &v);
 	treeView->hide();
 
 	// set-up menu for recent visited repositories
@@ -186,7 +186,7 @@ void MainImpl::initWithEventLoopActive() {
 void MainImpl::saveCurrentGeometry() {
 
 	QVector<QSplitter*> v(1, treeSplitter);
-	QGit::saveGeometrySetting(QGit::MAIN_GEOM_KEY, this, &v);
+	saveGeometrySetting(MAIN_GEOM_KEY, this, &v);
 }
 
 void MainImpl::highlightAbbrevSha(SCRef abbrevSha) {
@@ -245,7 +245,7 @@ void MainImpl::ActExternalDiff_activated() {
 	ExternalDiffProc* externalDiff = new ExternalDiffProc(filenames, this);
 	externalDiff->setWorkingDirectory(curDir);
 
-	if (!QGit::startProcess(externalDiff, args)) {
+	if (!startProcess(externalDiff, args)) {
 		QString text("Cannot start external viewer: ");
 		text.append(args[0]);
 		QMessageBox::warning(this, "Error - QGit", text);
@@ -343,7 +343,7 @@ void MainImpl::ActExternalEdit_activated() {
 	QProcess* externalEditor = new QProcess(this);
 	externalEditor->setWorkingDirectory(curDir);
 
-	if (!QGit::startProcess(externalEditor, args)) {
+	if (!startProcess(externalEditor, args)) {
 		QString text("Cannot start external text editor: ");
 		text.append(args[0]);
 		QMessageBox::warning(this, "Error - QGit", text);
@@ -650,7 +650,7 @@ void MainImpl::revisionsDropped(SCList remoteRevs) {
 	if (rv->isDropping()) // avoid reentrancy
 		return;
 
-	QDir dr(curDir + QGit::PATCHES_DIR);
+	QDir dr(curDir + PATCHES_DIR);
 	if (dr.exists()) {
 		const QString tmp("Please remove stale import directory " + dr.absolutePath());
 		statusBar()->showMessage(tmp);
@@ -688,7 +688,7 @@ void MainImpl::revisionsDropped(SCList remoteRevs) {
 		dr.refresh();
 		if (dr.count() != 1) {
 			qDebug("ASSERT in on_droppedRevisions: found %i files "
-			       "in %s", dr.count(), QGit::PATCHES_DIR.toLatin1().constData());
+			       "in %s", dr.count(), PATCHES_DIR.toLatin1().constData());
 			break;
 		}
 		SCRef fn(dr.absoluteFilePath(dr[0]));
@@ -1086,15 +1086,15 @@ void MainImpl::scrollTextEdit(int delta) {
 void MainImpl::adjustFontSize(int delta) {
 // font size is changed on a 'per instance' base and only on list views
 
-	int ps = QGit::STD_FONT.pointSize() + delta;
+	int ps = STD_FONT.pointSize() + delta;
 	if (ps < 2)
 		return;
 
-	QGit::STD_FONT.setPointSize(ps);
+	STD_FONT.setPointSize(ps);
 
 	QSettings settings;
-	settings.setValue(QGit::STD_FNT_KEY, QGit::STD_FONT.toString());
-	emit changeFont(QGit::STD_FONT);
+	settings.setValue(STD_FNT_KEY, STD_FONT.toString());
+	emit changeFont(STD_FONT);
 }
 
 void MainImpl::fileNamesLoad(int status, int value) {
