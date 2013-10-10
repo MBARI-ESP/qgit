@@ -257,28 +257,36 @@ void MainImpl::getExternalDiffArgs(QStringList* args, QStringList* filenames) {
 
 	// save files to diff in working directory,
 	// will be removed by ExternalDiffProc on exit
-	QFileInfo f(rv->st.fileName());
+	QString fn(rv->st.fileName());
+	QFileInfo f(fn);
 	QString prevRevSha(rv->st.diffToSha());
+	SCRef sha(rv->st.sha());
 	if (prevRevSha.isEmpty()) { // default to first parent
-		const Rev* r = git->revLookup(rv->st.sha());
-		prevRevSha = (r && r->parentsCount() > 0 ? r->parent(0) : rv->st.sha());
+		const Rev* r = git->revLookup(sha);
+		prevRevSha = (r && r->parentsCount() > 0 ? r->parent(0) : sha);
 	}
 	QFileInfo fi(f);
-	QString fName1(curDir + "/" + rv->st.sha().left(6) + "_" + fi.fileName());
-	QString fName2(curDir + "/" + prevRevSha.left(6) + "_" + fi.fileName());
+	QString fName1(prevRevSha.left(6) + "_" + fi.fileName());
+	filenames->append(fName1);  //so this gets deleted later
 
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
 	QByteArray fileContent;
-	QString fileSha(git->getFileSha(rv->st.fileName(), rv->st.sha()));
-	git->getFile(fileSha, NULL, &fileContent, rv->st.fileName());
+	QString fileSha(git->getFileSha(fn, prevRevSha));
+	git->getFile(fileSha, NULL, &fileContent, fn);
 	if (!writeToFile(fName1, QString(fileContent)))
 		statusBar()->showMessage("Unable to save " + fName1);
 
-	fileSha = git->getFileSha(rv->st.fileName(), prevRevSha);
-	git->getFile(fileSha, NULL, &fileContent, rv->st.fileName());
-	if (!writeToFile(fName2, QString(fileContent)))
-		statusBar()->showMessage("Unable to save " + fName2);
+	QString sha6(sha.left(6));
+	QString fName2(fn);
+	if (sha6 != "000000") {  //no copy if newer version not in repo
+		fName2 = sha6 + "_" + fi.fileName();
+		filenames->append(fName2);  //delete this file later
+	    fileSha = git->getFileSha(fn, sha);
+		git->getFile(fileSha, NULL, &fileContent, fn);
+		if (!writeToFile(fName2, QString(fileContent)))
+			statusBar()->showMessage("Unable to save " + fName2);
+    }
 
 	// get external diff viewer command
 	QSettings settings;
@@ -302,15 +310,11 @@ void MainImpl::getExternalDiffArgs(QStringList* args, QStringList* filenames) {
 
 		// perform any filename replacements that are necessary
 		// (done inside the loop to handle whitespace in paths properly)
-		curArg.replace("%1", fName2);
-		curArg.replace("%2", fName1);
+		curArg.replace("%1", fName1);
+		curArg.replace("%2", fName2);
 
 		args->append(curArg);
 	}
-
-	// set filenames so that they can be deleted when the process completes
-	filenames->append(fName1);
-	filenames->append(fName2);
 }
 
 // *************************** ExternalTextEditor ***************************
@@ -319,14 +323,12 @@ void MainImpl::ActExternalEdit_activated() {
 
 	QStringList args;
 	QStringList filenames;
-        
+
 	// get external diff viewer command
 	QSettings settings;
 	QString extEdit(settings.value(EXT_EDITOR_KEY, EXT_EDITOR_DEF).toString());
 
-	QApplication::restoreOverrideCursor();
-
-	// if command doesn't have %1 to denote filenames, add them to end
+	// if command doesn't have %1 to denote filename, append it
 	if (!extEdit.contains("%1")) {
 		extEdit.append(" %1");
 	}
@@ -1881,7 +1883,8 @@ void MainImpl::ActAbout_activated() {
 	"Copyright (c) 2011 Jean-François Dagenais &lt;dagenaisj@sonatest.com&gt;<br>"
 	"Copyright (c) 2011 Pavel Tikhomirov &lt;pavtih@gmail.com&gt;<br>"
 	"Copyright (c) 2011 Cristian Tibirna &lt;tibirna@kde.org&gt;<br>"
-	"Copyright (c) 2011 Tim Blechmann &lt;tim@klingt.org&gt;"
+	"Copyright (c) 2011 Tim Blechmann &lt;tim@klingt.org&gt;<br>"
+	"Copyright (c) 2013 Brent Roman &lt;brent@mbari.org&gt;"
     "</p>"
 
 	"<p>This version was compiled against Qt " QT_VERSION_STR "</p>";
