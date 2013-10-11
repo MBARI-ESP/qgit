@@ -266,7 +266,7 @@ void MainImpl::getExternalDiffArgs(QStringList* args, QStringList* filenames) {
 		prevRevSha = (r && r->parentsCount() > 0 ? r->parent(0) : sha);
 	}
 	QFileInfo fi(f);
-	QString fName1(prevRevSha.left(6) + "_" + fi.fileName());
+	QString fName1(curDir + "/" + prevRevSha.left(6) + "_" + fi.fileName());
 	filenames->append(fName1);  //so this gets deleted later
 
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -280,7 +280,7 @@ void MainImpl::getExternalDiffArgs(QStringList* args, QStringList* filenames) {
 	QString sha6(sha.left(6));
 	QString fName2(fn);
 	if (sha6 != "000000") {  //no copy if newer version not in repo
-		fName2 = sha6 + "_" + fi.fileName();
+		fName2 = curDir + "/" + sha6 + "_" + fi.fileName();
 		filenames->append(fName2);  //delete this file later
 	    fileSha = git->getFileSha(fn, sha);
 		git->getFile(fileSha, NULL, &fileContent, fn);
