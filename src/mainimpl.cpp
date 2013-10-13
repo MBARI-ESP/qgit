@@ -237,6 +237,27 @@ void MainImpl::ActForward_activated() {
 
 // *************************** ExternalDiffViewer ***************************
 
+static QString uniqTmpPath(
+		const QString &prefix, const QString &suffix)
+/*
+  This isn't as safe as QTemporaryFile, but it should be OK
+  so long as two proceses don't open the same file with the same SHA
+  at _exactly_ the same time (pretty unlikely)
+  returns "" if unique filename can't be generated
+*/
+{
+	QString common = QDir::cleanPath(QDir::tempPath() + "/" + prefix);
+    int tries = 2;
+    QString path;
+    do {
+      common += "_";
+      path = common + suffix;
+      if (!QFile(path).exists())
+        return path;
+    } while (--tries);   
+	return "";
+}
+
 void MainImpl::ActExternalDiff_activated() {
 
 	QStringList args;
@@ -266,7 +287,7 @@ void MainImpl::getExternalDiffArgs(QStringList* args, QStringList* filenames) {
 		prevRevSha = (r && r->parentsCount() > 0 ? r->parent(0) : sha);
 	}
 	QFileInfo fi(f);
-	QString fName1(curDir + "/" + prevRevSha.left(6) + "_" + fi.fileName());
+	QString fName1(uniqTmpPath(prevRevSha.left(6), fi.fileName()));
 	filenames->append(fName1);  //so this gets deleted later
 
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -280,9 +301,9 @@ void MainImpl::getExternalDiffArgs(QStringList* args, QStringList* filenames) {
 	QString sha6(sha.left(6));
 	QString fName2(fn);
 	if (sha6 != "000000") {  //no copy if newer version not in repo
-		fName2 = curDir + "/" + sha6 + "_" + fi.fileName();
+    	fName2 = uniqTmpPath(sha6, fi.fileName());
 		filenames->append(fName2);  //delete this file later
-	    fileSha = git->getFileSha(fn, sha);
+		fileSha = git->getFileSha(fn, sha);
 		git->getFile(fileSha, NULL, &fileContent, fn);
 		if (!writeToFile(fName2, QString(fileContent)))
 			statusBar()->showMessage("Unable to save " + fName2);
