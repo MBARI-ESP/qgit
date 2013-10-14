@@ -247,7 +247,7 @@ static QString uniqTmpPath(
 */
 {
 	QString common = QDir::cleanPath(QDir::tempPath() + "/" + prefix);
-    int tries = 2;
+    int tries = 30;
     QString path;
     do {
       common += "_";
